@@ -42,7 +42,9 @@ func resizeHandler(c *gin.Context) {
 
 	jpeg.Encode(file, resizedImage, nil)
 
-	c.String(200, "Success")
+	c.JSON(200, gin.H{
+		"results": "Image successfully converted",
+	})
 }
 
 func postFormValidation() gin.HandlerFunc {

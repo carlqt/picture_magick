@@ -1,0 +1,21 @@
+hash: 3c2306e1cede84b058fa5bc75720772b268f95ba26b989f3cbf8f32536240191
+updated: 2016-08-09T20:42:16.100528627+08:00
+imports:
+- name: github.com/gin-gonic/gin
+  version: e2fa89777e344782ef5d31929f095f4589c35dcc
+  subpackages:
+  - binding
+  - render
+- name: github.com/julienschmidt/httprouter
+  version: b428fda53bb0a764fea9c76c9413512eda291dec
+- name: github.com/mattn/go-colorable
+  version: ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/nfnt/resize
+  version: 891127d8d1b52734debe1b3c3d7e747502b6c366
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
+testImports: []
