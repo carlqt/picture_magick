@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
 	"image"
@@ -28,7 +30,10 @@ func resizeHandler(c *gin.Context) {
 	width, _ := strconv.ParseUint(c.PostForm("width"), 10, 64)
 	height, _ := strconv.ParseUint(c.PostForm("height"), 10, 64)
 
-	resizedImage, err := imageUtil(url, uint(height), uint(width))
+	resizedImage, _ := imageUtil(url, uint(height), uint(width))
+	buf := new(bytes.Buffer)
+	err := jpeg.Encode(buf, resizedImage, nil)
+
 	if err != nil {
 		c.String(400, err.Error())
 	}
@@ -41,9 +46,10 @@ func resizeHandler(c *gin.Context) {
 	defer file.Close()
 
 	jpeg.Encode(file, resizedImage, nil)
+	b64string := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	c.JSON(200, gin.H{
-		"results": "Image successfully converted",
+		"results": b64string,
 	})
 }
 
