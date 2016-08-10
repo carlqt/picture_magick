@@ -1,5 +1,4 @@
 package: github.com/carlqt/picture_magick
 import:
 - package: github.com/gin-gonic/gin
-  version: ^0.6.0
 - package: github.com/nfnt/resize
