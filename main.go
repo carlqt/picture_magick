@@ -33,7 +33,7 @@ func resizeHandler(c *gin.Context) {
 		c.String(400, err.Error())
 	}
 
-	file, err := os.Create("tmp/asa.jpg")
+	file, err := os.Create("tmp/resized_image.jpg")
 	if err != nil {
 		c.String(400, err.Error())
 	}
@@ -49,22 +49,21 @@ func resizeHandler(c *gin.Context) {
 
 func postFormValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, err := strconv.ParseUint(c.PostForm("width"), 10, 64)
-		if err != nil {
+		_, err1 := strconv.ParseUint(c.PostForm("width"), 10, 64)
+		_, err2 := strconv.ParseUint(c.PostForm("height"), 10, 64)
+
+		switch {
+		case err1 != nil:
 			c.JSON(400, gin.H{
 				"error": "width should be numeric",
 			})
 			c.Abort()
-		}
-
-		_, err = strconv.ParseUint(c.PostForm("height"), 10, 64)
-		if err != nil {
+		case err2 != nil:
 			c.JSON(400, gin.H{
 				"error": "height should be numeric",
 			})
 			c.Abort()
 		}
-
 		c.Next()
 	}
 }
