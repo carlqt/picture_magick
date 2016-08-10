@@ -4,8 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/gin-gonic/gin"
-	"github.com/nfnt/resize"
-	"image"
+	"github.com/carlqt/picture_magick/imgutil"
 	"image/jpeg"
 	"net/http"
 	"os"
@@ -30,7 +29,8 @@ func resizeHandler(c *gin.Context) {
 	width, _ := strconv.ParseUint(c.PostForm("width"), 10, 64)
 	height, _ := strconv.ParseUint(c.PostForm("height"), 10, 64)
 
-	resizedImage, _ := imageUtil(url, uint(height), uint(width))
+	imager := &imgutil.Imager{Address: url, Height: uint(height), Width: uint(width)}
+
 	buf := new(bytes.Buffer)
 	err := jpeg.Encode(buf, resizedImage, nil)
 
@@ -72,20 +72,4 @@ func postFormValidation() gin.HandlerFunc {
 		}
 		c.Next()
 	}
-}
-
-func imageUtil(url string, height uint, width uint) (image.Image, error) {
-	response, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	imgResponse, err := jpeg.Decode(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	resizedImage := resize.Resize(width, height, imgResponse, resize.Lanczos3)
-	return resizedImage, nil
 }
