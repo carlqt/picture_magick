@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
 	"image"
 	"image/jpeg"
+	"image/png"
 	"net/http"
 	"os"
 	"strconv"
@@ -28,19 +30,23 @@ func resizeHandler(c *gin.Context) {
 	width, _ := strconv.ParseUint(c.PostForm("width"), 10, 64)
 	height, _ := strconv.ParseUint(c.PostForm("height"), 10, 64)
 
-	resizedImage, err := imageUtil(url, uint(height), uint(width))
+	img, imgType, err := imageUtil(url)
+	// img, err := jpegDecode(url)
+	// imgType := "jpeg"
+
 	if err != nil {
 		c.String(400, err.Error())
 	}
 
-	file, err := os.Create("tmp/resized_image.jpg")
-	if err != nil {
-		c.String(400, err.Error())
+	resizedImage := resize.Resize(uint(width), uint(height), img, resize.Lanczos3)
+
+	switch imgType {
+	case "jpeg":
+		jpegEncode(resizedImage)
+	case "png":
+		pngEncode(resizedImage)
 	}
 
-	defer file.Close()
-
-	jpeg.Encode(file, resizedImage, nil)
 
 	c.JSON(200, gin.H{
 		"results": "Image successfully converted",
@@ -68,18 +74,42 @@ func postFormValidation() gin.HandlerFunc {
 	}
 }
 
-func imageUtil(url string, height uint, width uint) (image.Image, error) {
+func imageUtil(url string) (image.Image, string, error) {
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, "", err
+	}
+	defer response.Body.Close()
+
+	return image.Decode(response.Body)
+
+	// resizedImage := resize.Resize(width, height, imgResponse, resize.Lanczos3)
+	// return resizedImage, nil
+}
+
+func jpegDecode(url string) (image.Image, error) {
 	response, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	defer response.Body.Close()
 
-	imgResponse, err := jpeg.Decode(response.Body)
+	return jpeg.Decode(response.Body)
+}
+
+func jpegEncode(img image.Image) {
+	file, _ := os.Create("tmp/resized_image.jpg")
+
+	defer file.Close()
+	jpeg.Encode(file, img, nil)
+}
+
+func pngEncode(img image.Image) {
+	file, err := os.Create("tmp/resized_image.png")
 	if err != nil {
-		return nil, err
+		color.Red(err.Error())
 	}
 
-	resizedImage := resize.Resize(width, height, imgResponse, resize.Lanczos3)
-	return resizedImage, nil
+	defer file.Close()
+	png.Encode(file, img)
 }
