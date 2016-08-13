@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"github.com/fatih/color"
+	// "github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
 	"image"
@@ -10,7 +10,7 @@ import (
 	"image/png"
 	"image/gif"
 	"net/http"
-	"os"
+	// "os"
 	"strconv"
 	"io"
 	b64 "encoding/base64"
@@ -47,10 +47,10 @@ func resizeHandler(c *gin.Context) {
 	switch imgType {
 	case "jpeg":
 		buf = jpegEncode(resizedImage)
-	// case "png":
-	// 	pngEncode(resizedImage)
-	// case "gif":
-	// 	gifEncode(resizedImage)
+	case "png":
+		buf = pngEncode(resizedImage)
+	case "gif":
+		buf = gifEncode(resizedImage)
 	}
 
 
@@ -100,24 +100,22 @@ func jpegEncode(img image.Image) io.Writer {
 	return newBuff
 }
 
-func pngEncode(img image.Image) {
-	file, err := os.Create("tmp/resized_image.png")
-	if err != nil {
-		color.Red(err.Error())
-	}
+func pngEncode(img image.Image) io.Writer {
+	// file, err := os.Create("tmp/resized_image.png")
+	newBuff := bytes.NewBuffer(nil)
 
-	defer file.Close()
-	png.Encode(file, img)
+	// defer file.Close()
+	png.Encode(newBuff, img)
+	return newBuff
 }
 
-func gifEncode(img image.Image) {
-	file, err := os.Create("tmp/resized_image.gif")
-	if err != nil {
-		color.Red(err.Error())
-	}
+func gifEncode(img image.Image) io.Writer {
+	// file, err := os.Create("tmp/resized_image.gif")
+	newBuff := bytes.NewBuffer(nil)
 
-	defer file.Close()
-	gif.Encode(file, img, nil)
+	// defer file.Close()
+	gif.Encode(newBuff, img, nil)
+	return newBuff
 }
 
 func encodeBase64(buf io.Writer) string {
