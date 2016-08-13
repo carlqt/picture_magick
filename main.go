@@ -7,6 +7,7 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
+	"image/gif"
 	"net/http"
 	"os"
 	"strconv"
@@ -31,8 +32,6 @@ func resizeHandler(c *gin.Context) {
 	height, _ := strconv.ParseUint(c.PostForm("height"), 10, 64)
 
 	img, imgType, err := imageUtil(url)
-	// img, err := jpegDecode(url)
-	// imgType := "jpeg"
 
 	if err != nil {
 		c.String(400, err.Error())
@@ -45,6 +44,8 @@ func resizeHandler(c *gin.Context) {
 		jpegEncode(resizedImage)
 	case "png":
 		pngEncode(resizedImage)
+	case "gif":
+		gifEncode(resizedImage)
 	}
 
 
@@ -82,19 +83,6 @@ func imageUtil(url string) (image.Image, string, error) {
 	defer response.Body.Close()
 
 	return image.Decode(response.Body)
-
-	// resizedImage := resize.Resize(width, height, imgResponse, resize.Lanczos3)
-	// return resizedImage, nil
-}
-
-func jpegDecode(url string) (image.Image, error) {
-	response, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	return jpeg.Decode(response.Body)
 }
 
 func jpegEncode(img image.Image) {
@@ -112,4 +100,14 @@ func pngEncode(img image.Image) {
 
 	defer file.Close()
 	png.Encode(file, img)
+}
+
+func gifEncode(img image.Image) {
+	file, err := os.Create("tmp/resized_image.gif")
+	if err != nil {
+		color.Red(err.Error())
+	}
+
+	defer file.Close()
+	gif.Encode(file, img, nil)
 }
