@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
@@ -11,6 +12,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"io"
+	b64 "encoding/base64"
 )
 
 func main() {
@@ -27,6 +30,8 @@ func pong(c *gin.Context) {
 }
 
 func resizeHandler(c *gin.Context) {
+	var buf io.Writer
+
 	url := c.PostForm("url")
 	width, _ := strconv.ParseUint(c.PostForm("width"), 10, 64)
 	height, _ := strconv.ParseUint(c.PostForm("height"), 10, 64)
@@ -41,16 +46,17 @@ func resizeHandler(c *gin.Context) {
 
 	switch imgType {
 	case "jpeg":
-		jpegEncode(resizedImage)
-	case "png":
-		pngEncode(resizedImage)
-	case "gif":
-		gifEncode(resizedImage)
+		buf = jpegEncode(resizedImage)
+	// case "png":
+	// 	pngEncode(resizedImage)
+	// case "gif":
+	// 	gifEncode(resizedImage)
 	}
 
 
 	c.JSON(200, gin.H{
 		"results": "Image successfully converted",
+		"image": encodeBase64(buf),
 	})
 }
 
@@ -85,11 +91,13 @@ func imageUtil(url string) (image.Image, string, error) {
 	return image.Decode(response.Body)
 }
 
-func jpegEncode(img image.Image) {
-	file, _ := os.Create("tmp/resized_image.jpg")
+func jpegEncode(img image.Image) io.Writer {
+	// file, _ := os.Create("tmp/resized_image.jpg")
+	newBuff := bytes.NewBuffer(nil)
 
-	defer file.Close()
-	jpeg.Encode(file, img, nil)
+	// defer file.Close()
+	jpeg.Encode(newBuff, img, nil)
+	return newBuff
 }
 
 func pngEncode(img image.Image) {
@@ -110,4 +118,9 @@ func gifEncode(img image.Image) {
 
 	defer file.Close()
 	gif.Encode(file, img, nil)
+}
+
+func encodeBase64(buf io.Writer) string {
+	bufBytes := buf.(*bytes.Buffer)
+	return b64.StdEncoding.EncodeToString(bufBytes.Bytes())
 }
