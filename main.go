@@ -19,6 +19,7 @@ import (
 func main() {
 	router := gin.Default()
 
+	router.Use(corsHeader)
 	router.GET("/ping", pong)
 	router.POST("/resize", postFormValidation(), resizeHandler)
 
@@ -121,4 +122,9 @@ func gifEncode(img image.Image) io.Writer {
 func encodeBase64(buf io.Writer) string {
 	bufBytes := buf.(*bytes.Buffer)
 	return b64.StdEncoding.EncodeToString(bufBytes.Bytes())
+}
+
+// CORS Header
+func corsHeader(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 }
