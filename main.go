@@ -6,31 +6,36 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/nfnt/resize"
 	"image"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
-	"image/gif"
 	"net/http"
 	// "os"
-	"strconv"
-	"io"
 	b64 "encoding/base64"
+	"io"
+	"strconv"
 )
 
 func main() {
 	router := gin.Default()
 
 	router.Use(corsHeader)
-	router.GET("/ping", pong)
-	router.POST("/resize", postFormValidation(), resizeHandler)
+	router.GET("/ping", Pong)
+	router.POST("/resize", PostFormValidation(), ResizeHandler)
 
 	router.Run(":8000")
 }
 
-func pong(c *gin.Context) {
+func Pong(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
 }
 
-func resizeHandler(c *gin.Context) {
+// This method is here to help in writing the test
+func Foo() string {
+	return "hello"
+}
+
+func ResizeHandler(c *gin.Context) {
 	var buf io.Writer
 
 	url := c.PostForm("url")
@@ -54,14 +59,13 @@ func resizeHandler(c *gin.Context) {
 		buf = gifEncode(resizedImage)
 	}
 
-
 	c.JSON(200, gin.H{
 		"results": "Image successfully converted",
-		"image": encodeBase64(buf),
+		"image":   encodeBase64(buf),
 	})
 }
 
-func postFormValidation() gin.HandlerFunc {
+func PostFormValidation() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, err1 := strconv.ParseUint(c.PostForm("width"), 10, 64)
 		_, err2 := strconv.ParseUint(c.PostForm("height"), 10, 64)
