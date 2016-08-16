@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"fmt"
+	"github.com/urfave/cli"
 	"bytes"
 	// "github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -17,13 +20,36 @@ import (
 )
 
 func main() {
-	router := gin.Default()
+	var port string
 
-	router.Use(corsHeader)
-	router.GET("/ping", Pong)
-	router.POST("/resize", PostFormValidation(), ResizeHandler)
+	app := cli.NewApp()
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name: "port, p",
+			Value: "8000",
+			Usage: "Run server in a specific port",
+		},
+	}
 
-	router.Run(":8000")
+	app.Name = "Picture Magick"
+	app.Usage = "Resizing images"
+	app.Version = "0.1.0"
+
+	app.Action = func(c *cli.Context) error {
+		port = fmt.Sprintf(":%s", c.String("port"))
+		// run the router
+		router := gin.Default()
+
+		router.Use(corsHeader)
+		router.GET("/ping", Pong)
+		router.POST("/resize", PostFormValidation(), ResizeHandler)
+
+		router.Run(port)
+		return nil
+	}
+
+	app.Run(os.Args)
+
 }
 
 func Pong(c *gin.Context) {

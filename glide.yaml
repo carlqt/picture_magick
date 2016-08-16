@@ -2,3 +2,5 @@ package: github.com/carlqt/picture_magick
 import:
 - package: github.com/gin-gonic/gin
 - package: github.com/nfnt/resize
+- package: github.com/urfave/cli
+  version: v1.18.0
